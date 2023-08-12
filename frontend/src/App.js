@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import './App.css';
+import React from 'react';
+import './index.css'
 
 function App() {
   const [searchText1, setSearchText1] = useState("");
@@ -13,6 +15,7 @@ function App() {
   const [player2MatchData, setPlayer2MatchData] = useState([]);
   const [sameMatches, setSameMatches] = useState([]);
   const [wins, setWins] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   async function searchForPlayer(playerNumber) {
     const searchText = playerNumber === 1 ? searchText1 : searchText2;
@@ -75,14 +78,14 @@ function App() {
           playerName: playerInfo1.name,
         }
       });
-      setPlayer1MatchData(response1.data);
-      console.log("Player 1 matches: " + player1MatchData);
       const response2 = await axios.get("http://localhost:8000/getMatches", {
         params: {
           playerName: playerInfo2.name,
         }
       });
+      setPlayer1MatchData(response1.data);
       setPlayer2MatchData(response2.data);
+      console.log("Player 1 matches: " + player1MatchData);
       console.log("Player 2 matches: " + player2MatchData);
 
     } catch (error) {
@@ -90,20 +93,6 @@ function App() {
     }
   }
   useEffect(() => {
-      // check if both player match data arrays have data
-      // if(player1MatchData.length > 0 && player2MatchData.length > 0) {
-      //   const sameMatches = [];
-      //   for(let i = 0; i < player1MatchData.length; i++) {
-      //     for(let j = 0; j < player2MatchData.length; j++) {
-      //       if(player1MatchData[i] === player2MatchData[j]) {
-      //         sameMatches.push(player1MatchData[i]);
-      //       }
-      //     }
-      //   }
-      //   setSameMatches(sameMatches); // update the state with same matches
-      //   console.log(sameMatches);
-      // }
-      
       // for loop one, store all of the matches into a set
       const player1Set = new Set();
       for(let matchId of player1MatchData) {
@@ -123,68 +112,115 @@ function App() {
       // if true, add to the sameMatchesArray
 
   }, [player1MatchData, player2MatchData]);
-
-  // this makes it crash
+  
   async function analyzeMatches() {
     try {
+      setIsLoading(true);
+
       await getSameMatches();
+      
+      // perform the analysis using the updated sameMatches
       const response = await axios.post("http://localhost:8000/analyzeMatches", {
         sameMatches: sameMatches,
         playerName: playerInfo1.name
       });
+
       setWins(response.data);
-      console.log("The number of wins you guys had together is: " + wins);
+      console.log(response.data);
+      setIsLoading(false);
     } catch (error) {
       console.log("Error grabbing wins: ", error);
+      setIsLoading(false);
     }
   }
- 
   
 
   // html part of code
   return (
     <div className="App">
-      <h2>League Searcher</h2>
+      
+      <div className='Title'>
+      <h1 data-text="synergy:"></h1>
+      <p className='SubHeader'>by laura &lt;3</p>
+      </div>
 
-      <input type="text" onChange={e => setSearchText1(e.target.value)}></input>
-      <button onClick={() => searchForPlayer(1)}>Player 1</button>
-      <input type="text" onChange={e => setSearchText2(e.target.value)}></input>
-      <button onClick={() => searchForPlayer(2)}>Player 2</button>
+      {/* HEADER */}
+      <div className='middle'>
+      {/* SEARCH BARS */}
+      <div className='searchBars'>
+        <div className='searchBar'>
+          <p className='info'>player 1 name</p>
+          <input type="text" onChange={e => setSearchText1(e.target.value)}></input>
+          <button onClick={() => searchForPlayer(1)}>Search</button>
+        </div>
+        <div className='searchBar'>
+          <p className='info'>player 2 name</p>
+          <input type="text" onChange={e => setSearchText2(e.target.value)}></input>
+          <button onClick={() => searchForPlayer(2)}>Search</button>
+        </div>
+      </div>
+
+      <div className='MiddleBox'>
       {/* Display Player 1's Info and Icon */}
+      <div className='PlayerInfo Left'>
       {JSON.stringify(playerInfo1) !== '{}' ? 
       <>
-        <p>{playerInfo1.name}</p>
-        <p>Summoner level {playerInfo1.summonerLevel}</p>
+        <p className='in'>{playerInfo1.name}</p>
+        <p className='in'>Level {playerInfo1.summonerLevel}</p>
         <img width="100" 
         height="100" 
+        className='img'
         src={"http://ddragon.leagueoflegends.com/cdn/13.15.1/img/profileicon/" + playerIcon1 + ".png"} 
         alt="Player 1 Summoner Icon"></img>
       </> 
       : 
-      <> <p> No data for Player 1 </p></>}
+      <> <p></p></>}
+      </div>
 
-      {/* Displayer Player 2's Info and Icon */}
+      {/* Display Player 2's Info and Icon */}
+      <div className='PlayerInfo Right'>
       {JSON.stringify(playerInfo2) !== '{}' ?
       <>
-        <p>{playerInfo2.name}</p>
-        <p>Summoner level {playerInfo2.summonerLevel}</p>
+        <p className='in'>{playerInfo2.name}</p>
+        <p className='in'>Level {playerInfo2.summonerLevel}</p>
         <img 
         width="100" 
-        height="100" 
+        height="100"
+        className='img'
         src={"http://ddragon.leagueoflegends.com/cdn/13.15.1/img/profileicon/" + playerIcon2 + ".png"}
         alt = "Player 2 Summoner Icon"></img>
       </>
       :
-      <><p>No Data for Player 2</p></>}
-
-      {/* Button to fetch the same matches*/}
+      <><p></p></>}
+      </div>
+      </div>
+      </div>
+      {/* Gettings the Wins */}
+      <div className='Bottom'>
       {playerInfo1.name && playerInfo2.name && (
-        <div>
-        <button onClick={getSameMatches}>Get Same Matches</button>
+        <button onClick={async () => await analyzeMatches()}>
+          Calculate
+        </button>
+      )}
+      {isLoading && <p>Loading...</p>}
+      {wins !== null && !isLoading && (
+        <div className='winMessage'>
+          {wins >= 100 ? (
+          <p>Wow! Amazing synergy! You've won {wins} the matches played together.</p>
+          ) : wins >= 75 ? (
+          <p>Great synergy! You've won {wins} out of {sameMatches.length} matches played together.</p>
+          ) : wins >= 50 ? (
+          <p>Good synergy! You've won {wins} out of {sameMatches.length} matches played together.</p>
+          ) : wins >= 25 ? (
+          <p>Pretty good synergy! You've won {wins} out of {sameMatches.length} matches played together.</p>
+          ) : wins > 0 ? (
+          <p>Some synergy! You've won {wins} out of {sameMatches.length} matches played together.</p>
+          ) : (
+          <p>No synergy yet! Keep playing to improve your teamwork.</p>
+          )}
         </div>
-      )} 
-      
-      <button onClick={async () => await analyzeMatches()}>Wins?</button>
+      )}
+      </div>
 
     </div>
   );
