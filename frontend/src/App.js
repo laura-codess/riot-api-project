@@ -16,6 +16,7 @@ function App() {
   const [sameMatches, setSameMatches] = useState([]);
   const [wins, setWins] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const[isCalculationDone, setIsCalculationDone] = useState(false);
 
   async function searchForPlayer(playerNumber) {
     const searchText = playerNumber === 1 ? searchText1 : searchText2;
@@ -116,7 +117,6 @@ function App() {
   async function analyzeMatches() {
     try {
       setIsLoading(true);
-
       await getSameMatches();
       
       // perform the analysis using the updated sameMatches
@@ -128,9 +128,11 @@ function App() {
       setWins(response.data);
       console.log(response.data);
       setIsLoading(false);
+      setIsCalculationDone(true);
     } catch (error) {
       console.log("Error grabbing wins: ", error);
       setIsLoading(false);
+      setIsCalculationDone(false);
     }
   }
   
@@ -203,7 +205,7 @@ function App() {
         </button>
       )}
       {isLoading && <p>Loading...</p>}
-      {wins !== null && !isLoading && (
+      {wins !== null && isCalculationDone && !isLoading && (
         <div className='winMessage'>
           {wins >= 100 ? (
           <p>Wow! Amazing synergy! You've won {wins} the matches played together.</p>
