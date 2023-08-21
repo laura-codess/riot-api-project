@@ -115,26 +115,50 @@ function App() {
   }, [player1MatchData, player2MatchData]);
   
   async function analyzeMatches() {
-    try {
-      setIsLoading(true);
-      await getSameMatches();
-      
-      // perform the analysis using the updated sameMatches
-      const response = await axios.post("http://localhost:8000/analyzeMatches", {
-        sameMatches: sameMatches,
-        playerName: playerInfo1.name
+    setIsLoading(true);
+  
+    getSameMatches()
+      .then(() => {
+        // perform the analysis using the updated sameMatches
+        return axios.post("http://localhost:8000/analyzeMatches", {
+          sameMatches: sameMatches,
+          playerName: playerInfo1.name
+        });
+      })
+      .then(response => {
+        setWins(response.data);
+        console.log(response.data);
+        setIsLoading(false);
+        setIsCalculationDone(true);
+      })
+      .catch(error => {
+        console.log("Error grabbing wins: ", error);
+        setIsLoading(false);
+        setIsCalculationDone(false);
       });
-
-      setWins(response.data);
-      console.log(response.data);
-      setIsLoading(false);
-      setIsCalculationDone(true);
-    } catch (error) {
-      console.log("Error grabbing wins: ", error);
-      setIsLoading(false);
-      setIsCalculationDone(false);
-    }
   }
+  
+  // async function analyzeMatches() {
+  //   try {
+  //     setIsLoading(true);
+  //     await getSameMatches();
+      
+  //     // perform the analysis using the updated sameMatches
+  //     const response = await axios.post("http://localhost:8000/analyzeMatches", {
+  //       sameMatches: sameMatches,
+  //       playerName: playerInfo1.name
+  //     })
+
+  //     setWins(response.data);
+  //     console.log(response.data);
+  //     setIsLoading(false);
+  //     setIsCalculationDone(true);
+  //   } catch (error) {
+  //     console.log("Error grabbing wins: ", error);
+  //     setIsLoading(false);
+  //     setIsCalculationDone(false);
+  //   }
+  // }
   
 
   // html part of code
