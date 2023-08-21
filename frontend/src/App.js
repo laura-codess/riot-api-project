@@ -11,8 +11,8 @@ function App() {
   const [playerInfo2, setPlayerInfo2] = useState({});
   const [playerIcon1, setPlayerIcon1] = useState(0);
   const [playerIcon2, setPlayerIcon2] = useState(0);
-  const [player1MatchData, setPlayer1MatchData] = useState([]);
-  const [player2MatchData, setPlayer2MatchData] = useState([]);
+  // const [player1MatchData, setPlayer1MatchData] = useState([]);
+  // const [player2MatchData, setPlayer2MatchData] = useState([]);
   const [sameMatches, setSameMatches] = useState([]);
   const [wins, setWins] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -73,6 +73,7 @@ function App() {
   }
 
   async function getSameMatches() {
+    
     try {
       const response1 = await axios.get("http://localhost:8000/getMatches", {
         params: {
@@ -84,17 +85,12 @@ function App() {
           playerName: playerInfo2.name,
         }
       });
-      setPlayer1MatchData(response1.data);
-      setPlayer2MatchData(response2.data);
-      console.log("Player 1 matches: " + player1MatchData);
-      console.log("Player 2 matches: " + player2MatchData);
 
-    } catch (error) {
-      console.log("Error fetching same matches: ", error);
-    }
-  }
-  useEffect(() => {
-      // for loop one, store all of the matches into a set
+      const player1MatchData = response1.data
+      const player2MatchData = response2.data
+      // setPlayer1MatchData(response1.data);
+      // setPlayer2MatchData(response2.data);
+
       const player1Set = new Set();
       for(let matchId of player1MatchData) {
         player1Set.add(matchId);
@@ -110,18 +106,49 @@ function App() {
 
       setSameMatches(sameMatchArray);
       console.log(sameMatches);
-      // if true, add to the sameMatchesArray
 
-  }, [player1MatchData, player2MatchData]);
+      console.log("Player 1 matches: " + player1MatchData);
+      console.log("Player 2 matches: " + player2MatchData);
+      
+      return sameMatchArray;
+
+    } catch (error) {
+      console.log("Error fetching same matches: ", error);
+    }
+  }
+  // useEffect(() => {
+  //     // for loop one, store all of the matches into a set
+  //     const player1Set = new Set();
+  //     for(let matchId of player1MatchData) {
+  //       player1Set.add(matchId);
+  //     }
+
+  //     // for loop two, iterate through each of player2matches and see if it exists in set
+  //     const sameMatchArray = [];
+  //     for(let matchId of player2MatchData) {
+  //       if(player1Set.has(matchId)) {
+  //         sameMatchArray.push(matchId);
+  //       }
+  //     }
+
+  //     setSameMatches(sameMatchArray);
+  //     console.log(sameMatches);
+  //     // if true, add to the sameMatchesArray
+
+  // }, [player1MatchData, player2MatchData]);
   
   async function analyzeMatches() {
     setIsLoading(true);
   
+      console.log("start")
     getSameMatches()
-      .then(() => {
+      .then((sameMatchArray) => {
+        console.log("finished")
+        // console.log("Same matches:", sameMatches);
+        console.log("Same matches:", sameMatchArray);
         // perform the analysis using the updated sameMatches
         return axios.post("http://localhost:8000/analyzeMatches", {
-          sameMatches: sameMatches,
+          sameMatches: sameMatchArray,
           playerName: playerInfo1.name
         });
       })
@@ -138,29 +165,7 @@ function App() {
       });
   }
   
-  // async function analyzeMatches() {
-  //   try {
-  //     setIsLoading(true);
-  //     await getSameMatches();
-      
-  //     // perform the analysis using the updated sameMatches
-  //     const response = await axios.post("http://localhost:8000/analyzeMatches", {
-  //       sameMatches: sameMatches,
-  //       playerName: playerInfo1.name
-  //     })
-
-  //     setWins(response.data);
-  //     console.log(response.data);
-  //     setIsLoading(false);
-  //     setIsCalculationDone(true);
-  //   } catch (error) {
-  //     console.log("Error grabbing wins: ", error);
-  //     setIsLoading(false);
-  //     setIsCalculationDone(false);
-  //   }
-  // }
   
-
   // html part of code
   return (
     <div className="App">
@@ -231,15 +236,15 @@ function App() {
       {isLoading && <p>Loading...</p>}
       {wins !== null && isCalculationDone && !isLoading && (
         <div className='winMessage'>
-          {wins >= 100 ? (
+          {(wins * 100)/(sameMatches.length) >= 75 ? (
           <p>Wow! Amazing synergy! You've won {wins} the matches played together.</p>
-          ) : wins >= 75 ? (
+          ) : (wins * 100)/(sameMatches.length) >= 50 ? (
           <p>Great synergy! You've won {wins} out of {sameMatches.length} matches played together.</p>
-          ) : wins >= 50 ? (
+          ) : (wins * 100)/(sameMatches.length) >= 25 ? (
           <p>Good synergy! You've won {wins} out of {sameMatches.length} matches played together.</p>
-          ) : wins >= 25 ? (
+          ) : (wins * 100)/(sameMatches.length) >= 10 ? (
           <p>Pretty good synergy! You've won {wins} out of {sameMatches.length} matches played together.</p>
-          ) : wins > 0 ? (
+          ) : (wins * 100)/(sameMatches.length) >= 0 ? (
           <p>Some synergy! You've won {wins} out of {sameMatches.length} matches played together.</p>
           ) : (
           <p>No synergy yet! Keep playing to improve your teamwork.</p>
