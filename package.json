@@ -1,6 +1,9 @@
 {
+  "engines": {
+    "node": "14.x"
+  },
   "scripts": {
-    "start": "nodemon proxyServer.js"
+    "start": "node proxyServer.js"
   },
   "dependencies": {
     "axios": "^1.4.0",
