@@ -116,26 +116,6 @@ function App() {
       console.log("Error fetching same matches: ", error);
     }
   }
-  // useEffect(() => {
-  //     // for loop one, store all of the matches into a set
-  //     const player1Set = new Set();
-  //     for(let matchId of player1MatchData) {
-  //       player1Set.add(matchId);
-  //     }
-
-  //     // for loop two, iterate through each of player2matches and see if it exists in set
-  //     const sameMatchArray = [];
-  //     for(let matchId of player2MatchData) {
-  //       if(player1Set.has(matchId)) {
-  //         sameMatchArray.push(matchId);
-  //       }
-  //     }
-
-  //     setSameMatches(sameMatchArray);
-  //     console.log(sameMatches);
-  //     // if true, add to the sameMatchesArray
-
-  // }, [player1MatchData, player2MatchData]);
   
   async function analyzeMatches() {
     setIsLoading(true);
