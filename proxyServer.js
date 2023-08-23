@@ -3,13 +3,14 @@ var cors = require('cors');
 const axios = require('axios');
 const { get } = require('http');
 const bodyParser = require('body-parser');
+require('dotenv').config();
 
 var jsonParser = bodyParser.json();
 var app = express();
 
 app.use(cors({ origin: '*' }));
 
-const api_key = "RGAPI-d7077573-0cc6-42a5-ba9e-beec2287153f"
+const api_key = process.env.riot_api_key;
 
 function getPlayerPUUID(playerName) {
     return axios.get("https://na1.api.riotgames.com" + "/lol/summoner/v4/summoners/by-name/" + playerName + "?api_key=" + api_key)
