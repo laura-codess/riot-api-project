@@ -213,7 +213,7 @@ function App() {
           Calculate
         </button>
       )}
-      {isLoading && <p>Loading...</p>}
+      {isLoading && <p>hmm... give me a moment</p>}
       {wins !== null && isCalculationDone && !isLoading && (
         <div className='winMessage'>
           {(wins * 100)/(sameMatches.length) >= 75 ? (
