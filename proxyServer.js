@@ -2,6 +2,7 @@ var express = require('express');
 var cors = require('cors');
 const axios = require('axios');
 const { get } = require('http');
+const { createProxyMiddleware } = require('http-proxy-middleware');
 const bodyParser = require('body-parser');
 require('dotenv').config();
 
@@ -112,6 +113,12 @@ app.post("/analyzeMatches", jsonParser, async (req, res) => {
         res.status(500).json({ error: "An error occurred while processing the matches." });
     }
 });
+
+module.exports = function(app) {
+    app.use(
+        createProxyMiddleware(["/playerInfo", "/playerIcon", "/getMatches", "/analyzeMatches"], { target: "http://localhost:8000"})
+    );
+};
 
 app.listen(8000, function() {
     console.log("Server started on port 8000");
